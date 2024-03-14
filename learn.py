@@ -14,9 +14,9 @@ from torch.optim.lr_scheduler import StepLR
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(device)
+# device = torch.device("cpu")
 
 def train(model, train_loader, val_loader, criterion, optimizer, num_epochs=10):
-    model.to(device)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.1)
     best_val_loss = float('inf')  # Initialize best validation loss as infinity
 
@@ -67,10 +67,10 @@ def test(model, test_loader, criterion):
     print(f'Test Loss: {test_loss/len(test_loader)}')
 
 
-if True:
+if False:
     # Generate new data
     print("Preparing data...")
-    series, labels = generate_time_series(num_series, series_length, "stochastic", state_range=(2, 50), measurements=num_measurements)
+    series, labels = generate_time_series(num_series, series_length, "stochastic_stateful", state_range=(2, 20), measurements=num_measurements)
     np.save("data/series.npy",series)
     np.save("data/labels.npy",labels)
     print("Number of labels", len(labels))
@@ -102,12 +102,13 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Initialize the model, criterion, and optimizer
 model = HeavyCNN()
+model.to(device)
 # model = HeavierCNN()
 criterion = nn.MSELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-2, momentum=0.9)
 
 # Train the model
-train(model, train_loader, val_loader, criterion, optimizer, num_epochs=15)
+train(model, train_loader, val_loader, criterion, optimizer, num_epochs=100)
 
 # Test the model
 test(model, test_loader, criterion)
@@ -118,7 +119,8 @@ model.eval()
 outputs = []
 with torch.no_grad():
     for inputs, labels in test_loader:
-        outputs.append(model(inputs).squeeze().numpy())
+        inputs, labels = inputs.to(device), labels.to(device)
+        outputs.append(model(inputs).squeeze().cpu().numpy())
 outputs = np.concatenate(outputs)
 import matplotlib.pyplot as plt
 plt.hist(outputs, bins=50)

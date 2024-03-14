@@ -3,6 +3,7 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 import numpy as np
 from epsilon_machines.stochastic_epsilon import StochasticEpsilonMachine
+from epsilon_machines.stateful_stochastic_epsilon import StatefulStochasticEpsilonMachine
 
 class TimeSeriesDataset(Dataset):
     def __init__(self, series, labels, num_classes):
@@ -70,14 +71,13 @@ def generate_time_series(num_series, series_length, machine_type, state_range=(1
 
         if machine_type == "stochastic":
             machine = StochasticEpsilonMachine(num_states, possible_measurements)
-            # Assuming StochasticEpsilonMachine has a method to generate a series directly
-            series = machine.generate_series(series_length, 1) # Arbitrary starting measurement, might want to make random
-            entropy = machine.entropy()
-            # print(series, entropy)
-            # print("----")
-            if entropy != 0.0:
-                labels.append(entropy)
-                series_list.append(series)
+        elif machine_type == "stochastic_stateful":
+            machine = StatefulStochasticEpsilonMachine(num_states, possible_measurements)
+        series = machine.generate_series(series_length, 1) # Arbitrary starting measurement, might want to make random
+        entropy = machine.entropy()
+        if entropy != 0.0:
+            labels.append(entropy)
+            series_list.append(series)
 
     return np.array(series_list), np.array(labels)
 

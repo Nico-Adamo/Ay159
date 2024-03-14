@@ -9,7 +9,7 @@ class StatefulStochasticEpsilonMachine:
         Parameters:
         num_states (int): Number of states in the machine.
         measurements (list): A list of possible measurements Q.
-        transition_tensor (numpy.ndarray, optional): An n x n transition matrix T.
+        transition_tensor (numpy.ndarray, optional): An q x n x n transition matrix T.
         measurement_matrix (numpy.ndarray, optional): A matrix defining the measurement for transitions.
         """
         self.num_states = num_states
@@ -146,8 +146,3 @@ class StatefulStochasticEpsilonMachine:
 
         plt.savefig(filename)
         plt.close()
-
-for i in range(5, 30):
-    eps = StatefulStochasticEpsilonMachine(i, list(range(50)))
-    eps.generate_series(100, 0)
-    print(i, eps.entropy())
