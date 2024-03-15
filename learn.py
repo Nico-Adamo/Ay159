@@ -67,10 +67,10 @@ def test(model, test_loader, criterion):
     print(f'Test Loss: {test_loss/len(test_loader)}')
 
 
-if False:
+if True:
     # Generate new data
     print("Preparing data...")
-    series, labels = generate_time_series(num_series, series_length, "stochastic_stateful", state_range=(2, 20), measurements=num_measurements)
+    series, labels = generate_time_series(num_series, series_length, "stochastic", state_range=(2, 20), measurements=num_measurements)
     np.save("data/series.npy",series)
     np.save("data/labels.npy",labels)
     print("Number of labels", len(labels))
@@ -85,7 +85,6 @@ indices = np.arange(series.shape[0])
 np.random.shuffle(indices)
 series = series[indices]
 labels = labels[indices]
-
 # Split the data into training, validation, and test sets
 series_train, series_temp, labels_train, labels_temp = train_test_split(series, labels, test_size=0.4, random_state=42)
 series_val, series_test, labels_val, labels_test = train_test_split(series_temp, labels_temp, test_size=0.5, random_state=42)

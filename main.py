@@ -9,59 +9,59 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 # UNCOMMENT TO Load labels.npy and plot the distribution of labels, save to a file
-# import matplotlib.pyplot as plt
-# import numpy as np
-# labels = np.load("labels.npy")
-# plt.hist(labels, bins=50)
-# plt.xlabel("Shannon Entropy")
-# plt.ylabel("Frequency")
-# plt.savefig("labels_hist.png")
+import matplotlib.pyplot as plt
+import numpy as np
+labels = np.load("data/labels.npy")
+plt.hist(labels, bins=50)
+plt.xlabel("Shannon Entropy")
+plt.ylabel("Frequency")
+plt.savefig("labels_hist.png")
 
 # Load the model
-model = HeavyCNN()
-model.load_state_dict(torch.load("checkpoints/best.ckpt"))
+# model = HeavyCNN()
+# model.load_state_dict(torch.load("checkpoints/best.ckpt"))
 
-# Set the model to evaluation mode
-model.eval()
+# # Set the model to evaluation mode
+# model.eval()
 
-# Device configuration
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
+# # Device configuration
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model.to(device)
 
-# # UNCOMMENT BELOW FOR AVERAGE LOSS VS STATE NUMBER
-def evaluate_model(model, num_states):
-    series, labels = generate_time_series(500, 100, "stochastic", state_range=(num_states, num_states), measurements=num_measurements)
-    dataset = TimeSeriesDataset(series, labels, num_measurements)
-    loader = DataLoader(dataset, batch_size=64, shuffle=False)
+# # # UNCOMMENT BELOW FOR AVERAGE LOSS VS STATE NUMBER
+# def evaluate_model(model, num_states):
+#     series, labels = generate_time_series(500, 100, "stochastic", state_range=(num_states, num_states), measurements=num_measurements)
+#     dataset = TimeSeriesDataset(series, labels, num_measurements)
+#     loader = DataLoader(dataset, batch_size=64, shuffle=False)
 
-    criterion = torch.nn.MSELoss()
-    total_loss = 0.0
-    with torch.no_grad():
-        for inputs, labels in loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs).squeeze()
-            loss = criterion(outputs, labels)
-            total_loss += loss.item()
-    return total_loss / len(loader)
+#     criterion = torch.nn.MSELoss()
+#     total_loss = 0.0
+#     with torch.no_grad():
+#         for inputs, labels in loader:
+#             inputs, labels = inputs.to(device), labels.to(device)
+#             outputs = model(inputs).squeeze()
+#             loss = criterion(outputs, labels)
+#             total_loss += loss.item()
+#     return total_loss / len(loader)
 
-# Evaluate the model for different numbers of states
-num_states_range = range(2, 51)
-average_losses = []
+# # Evaluate the model for different numbers of states
+# num_states_range = range(2, 51)
+# average_losses = []
 
-for num_states in num_states_range:
-    avg_loss = evaluate_model(model, num_states)
-    average_losses.append(avg_loss)
-    print(f"Average loss for {num_states} states: {avg_loss}")
+# for num_states in num_states_range:
+#     avg_loss = evaluate_model(model, num_states)
+#     average_losses.append(avg_loss)
+#     print(f"Average loss for {num_states} states: {avg_loss}")
 
-# Plot the average loss against the number of states
-plt.figure(figsize=(10, 6))
-plt.plot(num_states_range, average_losses, marker='o')
-plt.title("Average MSE vs. Number of States")
-plt.xlabel("Number of States")
-plt.ylabel("Average Mean Squared Error")
-plt.grid(True)
-plt.savefig("average_loss_vs_states.png")
-plt.show()
+# # Plot the average loss against the number of states
+# plt.figure(figsize=(10, 6))
+# plt.plot(num_states_range, average_losses, marker='o')
+# plt.title("Average MSE vs. Number of States")
+# plt.xlabel("Number of States")
+# plt.ylabel("Average Mean Squared Error")
+# plt.grid(True)
+# plt.savefig("average_loss_vs_states.png")
+# plt.show()
 
 # # UNCOMMENT BELOW FOR AVERAGE LOSS VS ENTROPY
 # def evaluate_model_on_machines(model, num_machines=100):

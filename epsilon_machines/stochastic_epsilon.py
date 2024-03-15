@@ -85,8 +85,13 @@ class StochasticEpsilonMachine:
             num_transitions = int(np.random.normal(avg_transitions_per_state, 1))
             num_transitions = max(2, min(num_transitions, self.num_states))  # Ensure num_transitions is within valid range
                                                                              # At least 2 transitions so no probability 1 cycles
-
-            j_indices = np.random.choice(self.num_states, size=num_transitions, replace=False)
+            j_indices = set()
+            # Keep sampling from a gaussian until we have enough unique indices
+            while len(j_indices) < num_transitions:
+                j = np.random.normal(loc=i, scale=2)
+                j = int(j) % self.num_states
+                j_indices.add(j)
+            # j_indices = np.random.choice(self.num_states, size=num_transitions, replace=False)
 
             for j in j_indices:
                 T[i, j] = np.random.rand()  # Assign a random probability
