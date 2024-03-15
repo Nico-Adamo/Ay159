@@ -91,6 +91,7 @@ class StochasticEpsilonMachine:
                 j = np.random.normal(loc=i, scale=2)
                 j = int(j) % self.num_states
                 j_indices.add(j)
+            # For uniform choice:
             # j_indices = np.random.choice(self.num_states, size=num_transitions, replace=False)
 
             for j in j_indices:

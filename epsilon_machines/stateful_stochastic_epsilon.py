@@ -34,7 +34,7 @@ class StatefulStochasticEpsilonMachine:
         # Choose the next state based on the transition probabilities of the current state
         self.current_state = np.random.choice(
             self.num_states,
-            p=self.transition_tensor[self.current_state, :, measurement_idx]
+            p=self.transition_tensor[self.current_state]
         )
         # Find the measurement index associated with the new state
         measurement_idx = self.measurement_matrix[old_state, self.current_state, measurement_idx]
@@ -79,23 +79,27 @@ class StatefulStochasticEpsilonMachine:
         A tuple containing the initialized transition_tensor and measurement_matrix.
         """
         Q = len(self.measurements)
-        T = np.zeros((self.num_states, self.num_states, Q))
+        T = np.zeros((self.num_states, self.num_states))
         measurement_matrix = np.full((self.num_states, self.num_states, Q), -1)  # Initialize with -1 to indicate unfilled entries
 
         for i in range(self.num_states):
-            for q in range(Q):
-                # We pick a random number of transitions for each state based on a Gaussian
-                num_transitions = int(np.random.normal(avg_transitions_per_state, 1))
-                num_transitions = max(2, min(num_transitions, self.num_states))  # Ensure num_transitions is within valid range
+            # We pick a random number of transitions for each state based on a Gaussian
+            num_transitions = int(np.random.normal(avg_transitions_per_state, 1))
+            num_transitions = max(2, min(num_transitions, self.num_states))  # Ensure num_transitions is within valid range
                                                                                 # At least 2 transitions so no probability 1 cycles
+            j_indices = set()
+            # Keep sampling from a gaussian until we have enough unique indices
+            while len(j_indices) < num_transitions:
+                j = np.random.normal(loc=i, scale=2)
+                j = int(j) % self.num_states
+                j_indices.add(j)
+            for j in j_indices:
+                T[i, j] = np.random.rand()  # Assign a random probability
+            T[i] /= T[i].sum()  # Normalize
 
-                j_indices = np.random.choice(self.num_states, size=num_transitions, replace=False)
-
+            for q in range(Q):
                 for j in j_indices:
-                    T[i, j, q] = np.random.rand()  # Assign a random probability
                     measurement_matrix[i, j, q] = np.random.randint(len(self.measurements))
-
-                T[i, :, q] /= T[i, :, q].sum()  # Normalize
 
         return T, measurement_matrix
 
